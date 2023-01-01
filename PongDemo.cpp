@@ -31,13 +31,14 @@ int main()
 {
 	obj player = { -300,0,10,40 };
 	obj enemy = { 300,0,10,40 };
-	ball ball = { 0,0,10 ,5,5 };
+	ball ball = { 0,0,10,5,5 };
 
 	initgraph(width, height, NULL);
 	setorigin(width / 2, height / 2);
 	setbkcolor(RGB(164, 225, 202));
 	while (true)
 	{
+		player = playermovement(player);
 		showrec(player);
 		showrec(enemy);
 		showball(ball);
@@ -59,14 +60,6 @@ obj playermovement(obj ex)
 	if (GetAsyncKeyState(VK_DOWN))
 	{
 		ex.y += 10;
-	}
-	if (GetAsyncKeyState(VK_LEFT))
-	{
-		ex.x -= 10;
-	}
-	if (GetAsyncKeyState(VK_RIGHT))
-	{
-		ex.x += 10;
 	}
 	return ex;
 }
