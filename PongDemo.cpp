@@ -15,7 +15,7 @@ typedef struct
 
 
 
-
+void showrec(obj ex);
 obj playermovement(obj);
 
 
@@ -46,4 +46,8 @@ obj playermovement(obj ex)
 		ex.x += 10;
 	}
 	return ex;
+}
+void showrec(obj ex)
+{
+	solidrectangle(ex.x - (ex.widthsize), ex.y - (ex.heightsize), ex.x + (ex.widthsize), ex.y + (ex.heightsize));
 }
