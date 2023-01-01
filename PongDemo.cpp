@@ -21,8 +21,18 @@ obj playermovement(obj);
 
 int main()
 {
-
+	obj player = { -300,0,10,40 };
+	obj enemy = { 300,0,10,40 };
+	initgraph(width, height, NULL);
+	setorigin(width / 2, height / 2);
+	setbkcolor(RGB(164, 225, 202));
+	while (true)
+	{
+		Sleep(20);
+		cleardevice();
+	}
 	system("pause");
+	closegraph();
 	return 0;
 }
 
