@@ -34,6 +34,7 @@ int main()
 	ball ball = { 0,0,10,5,5 };
 
 	initgraph(width, height, NULL);
+	BeginBatchDraw();
 	setorigin(width / 2, height / 2);
 	setbkcolor(RGB(164, 225, 202));
 	while (true)
@@ -42,10 +43,12 @@ int main()
 		showrec(player);
 		showrec(enemy);
 		showball(ball);
+		FlushBatchDraw();
 		Sleep(20);
 		cleardevice();
 	}
 	system("pause");
+	EndBatchDraw();
 	closegraph();
 	return 0;
 }
