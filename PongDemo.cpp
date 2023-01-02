@@ -3,7 +3,7 @@
 
 int main()
 {
-
+	printf("ถู\n");
 	system("pause");
 	return 0;
 }
