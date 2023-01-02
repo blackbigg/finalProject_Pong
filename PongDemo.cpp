@@ -3,8 +3,12 @@
 #include <easyx.h>
 
 
-#define width 720
-#define height 480
+int width = 800;
+int height = 600;
+int R = 164, G = 225, B = 202;
+int Difficulty = 3;
+int playgame = 0;
+
 typedef struct
 {
 	int x;
@@ -36,151 +40,163 @@ ball ballserve(ball, obj, obj);
 void playerscore(ball);
 void enemyscore(ball);
 void vic(obj);
+obj enemyAI(obj, int, ball);
 int main()
 {
-int choice = 0;
+	int choice = 0;
 	while (choice <= 5) //進入選擇迴圈 選擇完3 4 5後還可以回到迴圈繼續選擇開始or離開
 	{
-		printf("歡迎來到Pong, 請選擇下列選項\n\n"
-			"1.開始遊戲\n2.離開遊戲\n3.選擇視窗大小\n4.選擇視窗顏色\n5.選擇難易度\n");
+		printf("Welcome to Pong Game select\n\n"
+			"1.Start\n2.Quit\n3.Window Size\n4.Window Color\n5.Difficulty\n");
 		scanf("%d", &choice);
 		switch (choice)
 		{
 		case 1:                          //選擇一 開始遊戲
-			printf("開始\n");
+			
 			choice = 6;      //選擇開始跳出選擇迴圈
+			playgame = 1;
 			break;
 		case 2:                          //選擇二 離開遊戲
-			printf("離開\n");
+			
 			choice = 6;      //選擇離開跳出選擇迴圈
 			break;
 		case 3:                          //選擇三 選擇視窗大小
 			int size;
-			printf("選擇視窗大小(1.720*480,2.800*600,3.1280*720)\n");
+			printf("Choose Window Size(1. 720*480 , 2. 800*600 , 3. 1280*720)\n");
 			scanf("%d", &size);
 			if (size == 1)
-				printf("視窗大小變更為 720*480\n");
+			{
+				width = 720;
+				height = 480;
+			}
 			if (size == 2)
-				printf("視窗大小變更為 800*600\n");
+			{
+				width = 800;
+				height = 600;
+			}
 			if (size == 3)
-				printf("視窗大小變更為 1280*720\n");
-			
+			{
+				width = 1280;
+				height = 720;
+			}
 			break;
 		case 4:                          //選擇四 選擇視窗顏色
-			int R, G, B;
-			printf("請輸入想要的R G B值\n");
+			printf("Input RGB Value\n");
 			scanf("%d", &R);
 			scanf("%d", &G);
 			scanf("%d", &B);
-			printf("已將螢幕顏色改為R=%d G=%d B=%d\n", R, G, B);
 			break;
 		case 5:                          //選擇五 選擇難易度
 			int d;
-			printf("請選擇難易度(簡單:1,普通:2,困難:3)\n");
+			printf("Choose(1.Easy,2.Normal,3.Hrd)\n");
 			scanf("%d", &d);
 			if (d == 1)
-				printf("已將難度調整為 簡單\n");
+				Difficulty = 1;
 			if (d == 2)
-				printf("已將難度調整為 普通\n");
+				Difficulty = 2;
 			if (d == 3)
-				printf("已將難度調整為 困難\n");
+				Difficulty = 3;
 			break;
 		}
 	}
 	obj player = { -(width * 3 / 8),0,10,40 };
-	obj enemy = { (width * 3 / 8),0,10,40 };
-	ball ball = { 0,0,10,10,0 };
+	obj enemy = { (width * 3 / 8),0,10,40,10 };
+	ball ball = { 0,0,10,0,0 ,1 };
 
 	initgraph(width, height, EX_SHOWCONSOLE);
 	BeginBatchDraw();
 	settextstyle(50, 0, 0);
 	setorigin(width / 2, height / 2);
-	setbkcolor(RGB(164, 225, 202));
-
-	while (true)
+	setbkcolor(RGB(R, G, B));
+	if (playgame == 1)
 	{
-		line(0, -(height / 2), 0, (height / 2));
-		player = playermovement(player);
-		ball = ballserve(ball, player, enemy);
-		ball = ballmove(ball, player, enemy);
-		showrec(player);
-		showrec(enemy);
-		showball(ball);
-		playerscore(ball);
-		enemyscore(ball);
-		FlushBatchDraw();
-		Sleep(20);
-		cleardevice();
-		if (ball.playerscore == 10)
+		while (true)
 		{
-			vic(player);
-			
-			break;
-		}
-		else if (ball.enemyscore == 10)
-		{
-			vic(enemy);
-			
-			break;
+			line(0, -(height / 2), 0, (height / 2));
+			player = playermovement(player);
+			enemy = enemyAI(enemy, Difficulty, ball);
+			ball = ballserve(ball, player, enemy);
+			ball = ballmove(ball, player, enemy);
+			showrec(player);
+			showrec(enemy);
+			showball(ball);
+			playerscore(ball);
+			enemyscore(ball);
+			FlushBatchDraw();
+			Sleep(20);
+			cleardevice();
+			if (ball.playerscore == 10)
+			{
+				vic(player);
+
+				break;
+			}
+			else if (ball.enemyscore == 10)
+			{
+				vic(enemy);
+
+				break;
+			}
 		}
 	}
+
 	EndBatchDraw();
 	closegraph();
 	return 0;
 }
 
 
-obj playermovement(obj ex)
+obj playermovement(obj player)
 {
-	ex.speed = 0;
-	if (ex.y - ex.heightsize >= -(height / 2))
+	player.speed = 0;
+	if (player.y - player.heightsize > -(height / 2))
 	{
 		if (GetAsyncKeyState('W'))
 		{
-			ex.speed = -10;
+			player.speed = -10;
 		}
 	}
-	if (ex.y + ex.heightsize <= (height / 2))
+	if (player.y + player.heightsize < (height / 2))
 	{
 		if (GetAsyncKeyState('S'))
 		{
-			ex.speed = 10;
+			player.speed = 10;
 		}
 	}
-	ex.y += ex.speed;
-	return ex;
+	player.y += player.speed;
+	return player;
 }
-void showrec(obj ex)
+void showrec(obj obj)
 {
-	solidrectangle(ex.x - (ex.widthsize), ex.y - (ex.heightsize), ex.x + (ex.widthsize), ex.y + (ex.heightsize));
+	solidrectangle(obj.x - (obj.widthsize), obj.y - (obj.heightsize), obj.x + (obj.widthsize), obj.y + (obj.heightsize));
 }
-void showball(ball ex)
+void showball(ball ball)
 {
-	solidcircle(ex.x, ex.y, ex.rad);
+	solidcircle(ball.x, ball.y, ball.rad);
 }
-ball ballmove(ball ex, obj player, obj enemy)
+ball ballmove(ball ball, obj player, obj enemy)
 {
 
-	ex.x += ex.speedx;
-	ex.y += ex.speedy;
-	if ((ex.x - ex.rad == player.x + player.widthsize) && (player.y - player.heightsize <= ex.y && ex.y <= player.y + player.heightsize))
+	ball.x += ball.speedx;
+	ball.y += ball.speedy;
+	if ((ball.x - ball.rad == player.x + player.widthsize) && (player.y - player.heightsize <= ball.y && ball.y <= player.y + player.heightsize))
 	{
-		ex = ballacceleration(ex, player);
-		ex.speedx *= -1;
+		ball = ballacceleration(ball, player);
+		ball.speedx *= -1;
 	}
-	if ((ex.x + ex.rad == enemy.x - enemy.widthsize) && (enemy.y - enemy.heightsize <= ex.y && ex.y <= enemy.y + enemy.heightsize))
+	if ((ball.x + ball.rad == enemy.x - enemy.widthsize) && (enemy.y - enemy.heightsize <= ball.y && ball.y <= enemy.y + enemy.heightsize))
 	{
-		ex = ballacceleration(ex, enemy);
-		ex.speedx *= -1;
+		ball = ballacceleration(ball, enemy);
+		ball.speedx *= -1;
 	}
-	if (ex.y <= -(height / 2) + ex.rad || ex.y >= (height / 2) - ex.rad ||
-		(ex.y + ex.rad == player.y - player.heightsize || ex.y - ex.rad == player.y + player.heightsize) && player.x - player.widthsize <= ex.x && ex.x <= player.x + player.widthsize ||
-		(ex.y + ex.rad == enemy.y - enemy.heightsize || ex.y - ex.rad == enemy.y + enemy.heightsize) && enemy.x - enemy.widthsize <= ex.x && ex.x <= enemy.x + enemy.widthsize
+	if (ball.y <= -(height / 2) + ball.rad || ball.y >= (height / 2) - ball.rad ||
+		(ball.y + ball.rad == player.y - player.heightsize || ball.y - ball.rad == player.y + player.heightsize) && player.x - player.widthsize <= ball.x && ball.x <= player.x + player.widthsize ||
+		(ball.y + ball.rad == enemy.y - enemy.heightsize || ball.y - ball.rad == enemy.y + enemy.heightsize) && enemy.x - enemy.widthsize <= ball.x && ball.x <= enemy.x + enemy.widthsize
 		)
 	{
-		ex.speedy *= -1;
+		ball.speedy *= -1;
 	}
-	return ex;
+	return ball;
 }
 ball ballacceleration(ball ball, obj obj)
 {
@@ -214,9 +230,11 @@ ball ballserve(ball ball, obj player, obj enemy)
 	}
 	if (ball.ballbelong == 1)
 	{
+		
 		ball.x = player.x + player.widthsize + ball.rad;
 		ball.y = player.y;
-		if (GetAsyncKeyState('D'))
+		
+		if (GetAsyncKeyState(VK_SPACE))
 		{
 			if (player.speed > 0)
 			{
@@ -228,25 +246,27 @@ ball ballserve(ball ball, obj player, obj enemy)
 			}
 			ball.speedx = 10;
 			ball.ballbelong = 0;
+			
 		}
+		
 	}
 	else if (ball.ballbelong == 2)
 	{
 		ball.x = enemy.x - enemy.widthsize - ball.rad;
 		ball.y = enemy.y;
-		if (GetAsyncKeyState(VK_LEFT))
-		{
-			if (player.speed > 0)
+	
+	
+			if (enemy.speed > 0)
 			{
 				ball.speedy = 5;
 			}
-			if (player.speed < 0)
+			if (enemy.speed < 0)
 			{
 				ball.speedy = -5;
 			}
 			ball.speedx = -10;
 			ball.ballbelong = 0;
-		}
+		
 	}
 
 	return ball;
@@ -275,4 +295,63 @@ void vic(obj obj)
 	}
 
 }
+obj enemyAI(obj enemy, int difficluty, ball ball)
+{
+	if (difficluty == 1)
+	{
+		enemy.speed = 0;
+	}
+	if (difficluty == 2)
+	{
 
+		if (enemy.y - enemy.heightsize == -(height / 2))
+		{
+			enemy.speed = 10;
+		}
+		if (enemy.y + enemy.heightsize == height / 2)
+		{
+			enemy.speed = -10;
+		}
+		enemy.y += enemy.speed;
+	}
+	if (difficluty == 3)
+	{
+		if ((ball.speedx==0||ball.speedy==0) && ball.ballbelong != 2)
+		{
+
+				if (ball.y<enemy.y)
+				{
+					enemy.y += -10;
+				}
+				if (ball.y>enemy.y)
+				{
+					enemy.y += 10;
+				}
+			
+		}
+		if (enemy.y - enemy.heightsize > -(height / 2)&&ball.speedy<0&&ball.ballbelong!=2)
+		{
+			if (ball.speedy>-10)
+			{
+			enemy.y += ball.speedy;
+			}
+			else
+			{
+				enemy.y += -10;
+			}
+		}
+		if (enemy.y + enemy.heightsize < (height / 2)&&ball.speedy>0&& ball.ballbelong != 2)
+		{
+			if (ball.speedy < 10)
+			{
+				enemy.y += ball.speedy;
+			}
+			else
+			{
+				enemy.y += 10;
+			}
+		}
+	}
+
+	return enemy;
+}
